@@ -1,0 +1,45 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Users ---
+    match /users/{userId} {
+      allow get: if true;
+      allow list: if true; 
+      
+      allow create: if isOwner(userId)
+        && request.resource.data.keys().hasAll(['uid', 'displayName', 'photoURL'])
+        && request.resource.data.uid == request.auth.uid;
+
+      allow update: if isOwner(userId)
+        && (
+          (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'photoURL', 'hwid', 'discordId']))
+        );
+    }
+
+    // --- Alerts ---
+    match /alerts/{alertId} {
+      allow read: if true;
+      allow create: if isSignedIn();
+    }
+  }
+}

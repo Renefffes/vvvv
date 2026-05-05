@@ -1,0 +1,42 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and subscription data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "email": { "type": "string" },
+        "plan": { "type": "string", "enum": ["Free", "Premium", "Enterprise"] },
+        "expiresAt": { "type": "string", "format": "date-time" },
+        "hwid": { "type": "string" },
+        "discordId": { "type": "string" }
+      },
+      "required": ["uid"]
+    },
+    "Alert": {
+      "title": "Alert",
+      "description": "Real-time log alert",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "speed": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "avatar": { "type": "string" }
+      },
+      "required": ["name", "speed", "timestamp"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Individual user profiles"
+    },
+    "/alerts/{alertId}": {
+      "schema": "Alert",
+      "description": "Public stream of real-time alerts"
+    }
+  }
+}
